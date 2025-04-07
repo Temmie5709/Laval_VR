@@ -53,7 +53,11 @@ Material:
     - _Distortion: 0.34
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _largeur: 0.02
+    - _hauteur: 0.02
+    - _hauteur_1: 23.99
+    - _largeur: 0.05
+    - _largeur_1: 0.85
     m_Colors:
-    - _Color: {r: 1, g: 1, b: 1, a: 0}
+    - _Color: {r: 766.99603, g: 766.99603, b: 766.99603, a: 0}
+    - _speed: {r: 0, g: 0.64, b: 0, a: 0}
   m_BuildTextureStacks: []

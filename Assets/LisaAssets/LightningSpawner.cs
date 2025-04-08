@@ -9,10 +9,11 @@ public class LightningSpawner : MonoBehaviour
     public float thunderDelay = 1f;
 
     public VisualEffect vfx;
-    public Collider lightningCollider; // Le collider de l’éclair
-    public Collider playerCollider;    // Le collider du joueur
+    public Collider lightningCollider; // Trigger
+    public Collider playerCollider;    // Celui du joueur (non trigger, probablement CharacterController)
 
     private int lightningCount = 0;
+    private bool canTrigger = true; // Pour éviter plusieurs déclenchements
 
     void Start()
     {
@@ -27,22 +28,12 @@ public class LightningSpawner : MonoBehaviour
         eclair.Play();
         lightningCount++;
 
-        // Vérifie si le joueur est touché par l’éclair
-        if (playerCollider != null && lightningCollider != null)
-        {
-
-        }
-
         if (lightningCount != 3 && (lightningCount < 3 || (lightningCount - 3) % 5 != 0))
         {
             Invoke("PlayThunder", thunderDelay);
-
-                        if (lightningCollider.bounds.Intersects(playerCollider.bounds))
-            {
-                // Le joueur est touché !
-                TriggerVFX();
-            }
         }
+
+        canTrigger = true; // Réactiver la possibilité de détecter une nouvelle collision
     }
 
     void PlayThunder()
@@ -53,6 +44,17 @@ public class LightningSpawner : MonoBehaviour
         }
     }
 
+    // Cette méthode est appelée automatiquement quand un objet entre dans le trigger
+    void OnTriggerEnter(Collider other)
+    {
+        if (canTrigger && other == playerCollider)
+        {
+            Debug.Log("Le joueur a été touché par l’éclair !");
+            TriggerVFX();
+            canTrigger = false; // Empêcher que ça se déclenche plusieurs fois de suite
+        }
+    }
+
     void TriggerVFX()
     {
         if (vfx != null)
@@ -60,11 +62,9 @@ public class LightningSpawner : MonoBehaviour
             vfx.SetFloat("Nombre", 600);
             vfx.SetFloat("life", 10f);
 
-            // Remettre life à 0 après 20 secondes
+            // Reset progressif
             Invoke(nameof(ResetLife), 20f);
-
-            // Remettre nombre à 0 encore 10 secondes plus tard
-            Invoke(nameof(ResetNombre), 30f); // 20 + 10
+            Invoke(nameof(ResetNombre), 30f); // 10 sec après reset de life
         }
     }
 

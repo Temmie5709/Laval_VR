@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.VFX;
-using System.Collections;  // Nécessaire pour utiliser les coroutines
+using System.Collections;
 
-public class CheckSphere : MonoBehaviour
+public class CheckSphere1 : MonoBehaviour
 {
     public GameObject[] targetObjects;  // Liste des objets à vérifier
     public GameObject correctTarget;    // L'objet correct à vérifier
@@ -11,9 +11,16 @@ public class CheckSphere : MonoBehaviour
     public Texture3D sdfSphere;
     public Texture3D sdfArbre;
     public Texture3D sdfArbreTemp; // Nouvelle texture pour l'effet temporaire
-
+    public string variable; 
     private bool isCorrectTargetInPlace = false;
-    private bool isCoroutineRunning = false; // Ajout de cette variable pour contrôler la coroutine
+    private bool isCoroutineRunning = false; // Contrôle de la coroutine
+    private float groundY; // Variable pour stocker la hauteur du sol
+
+    void Start()
+    {
+        // On suppose que le socle est situé à une certaine hauteur (ex. 0 sur l'axe Y)
+        groundY = transform.position.y;
+    }
 
     void Update()
     {
@@ -31,15 +38,14 @@ public class CheckSphere : MonoBehaviour
                 if (target == correctTarget)
                 {
                     correctTargetInRange = true;
-                    target.transform.position = transform.position;
-                    Debug.Log("Le bon objet est dans la zone, il se déplace !");
+                    // On fixe l'objet à la position du socle, en maintenant la hauteur du sol
+                    target.transform.position = new Vector3(transform.position.x, groundY, transform.position.z);
                 }
                 else
                 {
-                    target.transform.position = transform.position;  // Déplace les autres objets
-                    Debug.Log("Un objet incorrect est dans la zone : " + target.name);
+                    // Déplace les autres objets tout en maintenant la hauteur du sol
+                    target.transform.position = new Vector3(transform.position.x, groundY, transform.position.z);
 
-                    // Si la coroutine n'est pas déjà en cours, lance-la
                     if (!isCoroutineRunning)
                     {
                         StartCoroutine(ChangeTextureTemporarily());  // Lance la coroutine une seule fois
@@ -48,28 +54,31 @@ public class CheckSphere : MonoBehaviour
             }
             else
             {
-                // Si un objet incorrect est retiré de la zone
                 if (target != correctTarget && isCoroutineRunning)
                 {
                     StopCoroutine(ChangeTextureTemporarily()); // Arrête la coroutine si l'objet incorrect est retiré
                     isCoroutineRunning = false; // La coroutine n'est plus en cours
-                    Debug.Log("L'objet incorrect a quitté la zone. La coroutine est arrêtée.");
                 }
             }
         }
 
-        // Met à jour la texture du Visual Effect selon l'état de l'objet correct
+        // Mise à jour de la texture du Visual Effect selon l'état de l'objet correct
         if (correctTargetInRange && !isCorrectTargetInPlace)
         {
             isCorrectTargetInPlace = true;
             UpdateTexture(true);  // Met à jour la texture à la bonne valeur
-            Debug.Log("Le bon objet est maintenant en place. Mise à jour de la texture.");
         }
         else if (!correctTargetInRange && isCorrectTargetInPlace)
         {
             isCorrectTargetInPlace = false;
             UpdateTexture(false);  // Remet la texture à "None"
-            Debug.Log("L'objet correct est retiré, remise à zéro de la texture.");
+        }
+
+        // Si l'objet correct est en dehors de la zone, on rétablit la texture en sphère
+        if (!correctTargetInRange && isCorrectTargetInPlace)
+        {
+            isCorrectTargetInPlace = false;
+            UpdateTexture(false);  // Remet la texture à "None" (ou à la sphère si tu préfères)
         }
     }
 
@@ -80,13 +89,12 @@ public class CheckSphere : MonoBehaviour
             // Si l'objet correct est en place, on change la texture dans le VisualEffect
             if (isCorrect)
             {
-                visualEffect.SetTexture("SDF", sdfArbre);  // Si correct, texture finale
-                Debug.Log("Texture changée en sdfArbre (correct)");
+                visualEffect.SetTexture(variable, sdfArbre);  // Texture finale (l'arbre)
             }
             else
             {
-                // Pas besoin de lancer la coroutine ici car elle est déjà gérée plus tôt
-                Debug.Log("Texture changée en sdfArbreTemp (incorrect)");
+                // Remet la texture à la sphère (ou la texture par défaut)
+                visualEffect.SetTexture(variable, sdfSphere);  // Texture de retour (la sphère)
             }
         }
     }
@@ -95,15 +103,12 @@ public class CheckSphere : MonoBehaviour
     IEnumerator ChangeTextureTemporarily()
     {
         isCoroutineRunning = true; // Indiquer que la coroutine est en cours
-        visualEffect.SetTexture("SDF", sdfArbreTemp);  // Change la texture à sdfArbreTemp
-        Debug.Log("Texture temporaire changée en sdfArbreTemp");
+        visualEffect.SetTexture(variable, sdfArbreTemp);  // Change la texture à sdfArbreTemp
 
         // Attends pendant 2 secondes
         yield return new WaitForSeconds(2f);
 
-        visualEffect.SetTexture("SDF", sdfSphere);  // Après 2 secondes, on remet sdfSphere
-        Debug.Log("Retour à la texture sdfSphere après 2 secondes");
-
+        visualEffect.SetTexture(variable, sdfSphere);  // Après 2 secondes, on remet sdfSphere
         isCoroutineRunning = false; // La coroutine est terminée
     }
 }

@@ -6,6 +6,8 @@ public class VFXControl : MonoBehaviour
 {
     public GameObject bigLightObject;
     public GameObject explosionObject;
+    public GameObject Nuage;
+    public GameObject Eclair;
     public VisualEffect bigLightVFX;
     public VisualEffect explosionVFX;
     public VisualEffect joueurExplodVFX; // Nouveau VFX pour le joueur
@@ -64,7 +66,7 @@ void Start()
                Ruby4.isCorrectTargetInPlace4;
     }
 
-    void Final()
+    public void Final()
     {
         pass= true;
         StartCoroutine(HandleVFXSequence());
@@ -141,6 +143,8 @@ void Start()
         // Désactivation des objets après avoir atteint 25000
         bigLightObject.SetActive(false);
         explosionObject.SetActive(false);
+        Nuage.SetActive(false);
+        Eclair.SetActive(false);
 
         // Descente de Nombre de 25000 à 0 en 3 secondes
         float rampDownDuration = 3f;

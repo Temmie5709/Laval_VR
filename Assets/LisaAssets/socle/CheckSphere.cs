@@ -12,7 +12,7 @@ public class CheckSphere : MonoBehaviour
     public Texture3D sdfArbre;
     public Texture3D sdfArbreTemp; // Nouvelle texture pour l'effet temporaire
     public string variable; 
-    private bool isCorrectTargetInPlace = false;
+    public bool isCorrectTargetInPlace = false;
     private bool isCoroutineRunning = false; // Contrôle de la coroutine
     private float groundY; // Variable pour stocker la hauteur du sol
 

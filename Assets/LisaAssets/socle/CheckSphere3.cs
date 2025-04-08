@@ -12,7 +12,7 @@ public class CheckSphere3 : MonoBehaviour
     public Texture3D sdfArbre;
     public Texture3D sdfArbreTemp; // Nouvelle texture pour l'effet temporaire
     public string variable; 
-    private bool isCorrectTargetInPlace = false;
+    public  bool isCorrectTargetInPlace3 = false;
     private bool isCoroutineRunning = false; // Contrôle de la coroutine
     private float groundY; // Variable pour stocker la hauteur du sol
 
@@ -63,21 +63,21 @@ public class CheckSphere3 : MonoBehaviour
         }
 
         // Mise à jour de la texture du Visual Effect selon l'état de l'objet correct
-        if (correctTargetInRange && !isCorrectTargetInPlace)
+        if (correctTargetInRange && !isCorrectTargetInPlace3)
         {
-            isCorrectTargetInPlace = true;
+            isCorrectTargetInPlace3 = true;
             UpdateTexture(true);  // Met à jour la texture à la bonne valeur
         }
-        else if (!correctTargetInRange && isCorrectTargetInPlace)
+        else if (!correctTargetInRange && isCorrectTargetInPlace3)
         {
-            isCorrectTargetInPlace = false;
+            isCorrectTargetInPlace3 = false;
             UpdateTexture(false);  // Remet la texture à "None"
         }
 
         // Si l'objet correct est en dehors de la zone, on rétablit la texture en sphère
-        if (!correctTargetInRange && isCorrectTargetInPlace)
+        if (!correctTargetInRange && isCorrectTargetInPlace3)
         {
-            isCorrectTargetInPlace = false;
+            isCorrectTargetInPlace3 = false;
             UpdateTexture(false);  // Remet la texture à "None" (ou à la sphère si tu préfères)
         }
     }

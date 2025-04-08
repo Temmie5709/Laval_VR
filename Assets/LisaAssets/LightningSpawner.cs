@@ -9,11 +9,11 @@ public class LightningSpawner : MonoBehaviour
     public float thunderDelay = 1f;
 
     public VisualEffect vfx;
-    public Collider lightningCollider; // Trigger
-    public Collider playerCollider;    // Celui du joueur (non trigger, probablement CharacterController)
+    public Collider lightningCollider; // Le collider de l’éclair (isKinematic)
+    public Collider playerCollider;    // Le collider du joueur (CharacterController ou autre)
 
     private int lightningCount = 0;
-    private bool canTrigger = true; // Pour éviter plusieurs déclenchements
+    private bool vfxActive = false;
 
     void Start()
     {
@@ -28,12 +28,20 @@ public class LightningSpawner : MonoBehaviour
         eclair.Play();
         lightningCount++;
 
+        // Vérifie la collision dès que l’éclair apparaît
+        if (playerCollider != null && lightningCollider != null)
+        {
+            if (lightningCollider.bounds.Intersects(playerCollider.bounds) && !vfxActive)
+            {
+                TriggerVFX();
+            }
+        }
+
+        // Si on est dans les bonnes conditions pour un son de tonnerre
         if (lightningCount != 3 && (lightningCount < 3 || (lightningCount - 3) % 5 != 0))
         {
             Invoke("PlayThunder", thunderDelay);
         }
-
-        canTrigger = true; // Réactiver la possibilité de détecter une nouvelle collision
     }
 
     void PlayThunder()
@@ -44,27 +52,17 @@ public class LightningSpawner : MonoBehaviour
         }
     }
 
-    // Cette méthode est appelée automatiquement quand un objet entre dans le trigger
-    void OnTriggerEnter(Collider other)
-    {
-        if (canTrigger && other == playerCollider)
-        {
-            Debug.Log("Le joueur a été touché par l’éclair !");
-            TriggerVFX();
-            canTrigger = false; // Empêcher que ça se déclenche plusieurs fois de suite
-        }
-    }
-
     void TriggerVFX()
     {
         if (vfx != null)
         {
             vfx.SetFloat("Nombre", 600);
             vfx.SetFloat("life", 10f);
+            vfxActive = true;
 
-            // Reset progressif
-            Invoke(nameof(ResetLife), 20f);
-            Invoke(nameof(ResetNombre), 30f); // 10 sec après reset de life
+            // Reset VFX valeurs après un moment
+            Invoke(nameof(ResetLife), 10f);
+            Invoke(nameof(ResetNombre), 20f);
         }
     }
 
@@ -82,5 +80,18 @@ public class LightningSpawner : MonoBehaviour
         {
             vfx.SetFloat("Nombre", 0);
         }
+        vfxActive = false;
     }
+
+#if UNITY_EDITOR
+    // Pour voir le collider dans l'éditeur
+    void OnDrawGizmos()
+    {
+        if (lightningCollider != null)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireCube(lightningCollider.bounds.center, lightningCollider.bounds.size);
+        }
+    }
+#endif
 }
